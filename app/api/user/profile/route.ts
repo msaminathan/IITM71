@@ -46,6 +46,6 @@ export async function PUT(req: Request) {
         return NextResponse.json(updatedUser);
     } catch (error) {
         console.error("[PROFILE_UPDATE]", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return new NextResponse((error as Error).message || "Internal Error", { status: 500 });
     }
 }

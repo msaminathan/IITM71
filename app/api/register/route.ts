@@ -68,6 +68,6 @@ export async function POST(req: Request) {
         });
     } catch (error) {
         console.error("[REGISTER_POST]", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return new NextResponse((error as Error).message || "Internal Error", { status: 500 });
     }
 }

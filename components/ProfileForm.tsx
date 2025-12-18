@@ -37,13 +37,16 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 body: formData,
             });
 
-            if (!res.ok) throw new Error('Upload failed');
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || 'Upload failed');
+            }
 
             const { url } = await res.json();
             setFormData(prev => ({ ...prev, [field]: url }));
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert('Failed to upload image');
+            alert(`Failed to upload image: ${(error as Error).message}`);
         } finally {
             setUploading(false);
         }

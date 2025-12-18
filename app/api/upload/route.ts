@@ -21,6 +21,8 @@ export async function POST(req: Request) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
+        console.log(`[UPLOAD] Processing file: ${file.name}, Size: ${buffer.length} bytes`);
+
         // Convert to Base64 string with data URI prefix
         const mimeType = file.type || 'application/octet-stream';
         const base64Data = buffer.toString('base64');
@@ -32,6 +34,6 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("[UPLOAD_ERROR]", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        return new NextResponse((error as Error).message || "Internal Server Error", { status: 500 });
     }
 }

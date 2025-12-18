@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
     adapter: PrismaAdapter(prisma) as any, // Type assertion due to version mismatch
     session: {
         strategy: "jwt",

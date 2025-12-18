@@ -18,19 +18,17 @@ export async function POST(req: Request) {
             return new NextResponse("No file uploaded", { status: 400 });
         }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
-        // Ensure uploads directory exists
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
-        await mkdir(uploadDir, { recursive: true });
+        // Convert to Base64 string with data URI prefix
+        const mimeType = file.type || 'application/octet-stream';
+        const base64Data = buffer.toString('base64');
+        const dataUri = `data:${mimeType};base64,${base64Data}`;
 
-        const filepath = path.join(uploadDir, filename);
-        await writeFile(filepath, buffer);
-
-        const publicPath = `/uploads/${filename}`;
-
-        return NextResponse.json({ url: publicPath });
+        // Return the data URI directly. The frontend/client will receive this "url" 
+        // and save it to the user's profile in the database via the profile update API.
+        return NextResponse.json({ url: dataUri });
 
     } catch (error) {
         console.error("[UPLOAD_ERROR]", error);

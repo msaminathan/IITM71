@@ -23,30 +23,59 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
 
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    // Compress to JPEG with 0.7 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'photo1966' | 'photoCurrent') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
         setUploading(true);
         try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(errorText || 'Upload failed');
-            }
-
-            const { url } = await res.json();
-            setFormData(prev => ({ ...prev, [field]: url }));
+            // Client-side compression
+            const compressedDataUrl = await compressImage(file);
+            setFormData(prev => ({ ...prev, [field]: compressedDataUrl }));
         } catch (error) {
-            console.error('Error uploading file:', error);
-            alert(`Failed to upload image: ${(error as Error).message}`);
+            console.error('Error processing file:', error);
+            alert('Failed to process image');
         } finally {
             setUploading(false);
         }
@@ -82,13 +111,15 @@ export default function ProfileForm({ user }: ProfileFormProps) {
             });
 
             if (!res.ok) {
-                throw new Error('Failed to update profile');
+                const errorText = await res.text();
+                throw new Error(errorText || 'Failed to update profile');
             }
 
             setMessage('Profile updated successfully!');
             router.refresh();
         } catch (error) {
-            setMessage('Error updating profile');
+            console.error('Profile update error:', error);
+            setMessage(`Error updating profile: ${(error as Error).message}`);
         } finally {
             setIsLoading(false);
         }

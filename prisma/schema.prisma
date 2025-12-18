@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,7 +13,7 @@ model User {
   username      String?   @unique
   email         String?   @unique
   emailVerified DateTime?
-  image         String?   // Used as current photo or avatar
+  image         String?   @db.Text // Used as current photo or avatar
   password      String?
 
   // Alumni Specific Fields
@@ -21,12 +21,12 @@ model User {
   dob                 DateTime?
   marriageAnniversary DateTime?
   branch              String?   // Aeronautical, Chemical, Mechanical, Electrical(HC), Electrical(LC), Metallurgical, Civil
-  photo1966           String?
-  photoCurrent        String?
+  photo1966           String?   @db.Text
+  photoCurrent        String?   @db.Text
   
   role                String    @default("USER") // USER, ADMIN
 
-  bio                 String?
+  bio                 String?   @db.Text
   location            String?
 
   createdAt     DateTime  @default(now())
@@ -75,10 +75,10 @@ model VerificationToken {
 model Post {
   id        String   @id @default(cuid())
   title     String
-  content   String
+  content   String   @db.Text
   type      String   @default("NEWS") // NEWS, EVENT, GET_TOGETHER
-  imageUrl  String?
-  linkUrl   String?
+  imageUrl  String?  @db.Text
+  linkUrl   String?  @db.Text
   published Boolean  @default(true)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])

@@ -33,9 +33,15 @@ export default function Footer() {
                     <p className="text-base text-gray-400">
                         &copy; {new Date().getFullYear()} IIT Madras Class of 1971. All rights reserved.
                     </p>
-                    <p className="text-xs text-gray-500 mt-2 md:mt-0">
-                        Made with pride for the Golden Jubilee Batch.
-                    </p>
+                    <div className="flex items-center space-x-4">
+                        <p className="text-xs text-gray-500 mt-2 md:mt-0">
+                            Made with pride for the Golden Jubilee Batch.
+                        </p>
+                        <span className="text-gray-600">|</span>
+                        <Link href="/credits" className="text-xs text-gray-500 hover:text-white transition-colors">
+                            Built with Antigravity
+                        </Link>
+                    </div>
                 </div>
             </div>
         </footer>
